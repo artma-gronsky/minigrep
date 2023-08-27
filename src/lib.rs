@@ -1,26 +1,33 @@
 use std::{error::Error, fs, env};
 
-pub struct Config<'a> {
-    pub query: &'a str,
-    pub file_path: &'a str,
+pub struct Config {
+    pub query: String,
+    pub file_path: String,
     pub ignore_case: bool
 }
 
-impl Config<'_> {
-    pub fn build(args: &[String]) -> Result<Config, &str> {
-        Self::validate_args(args)?;
-
-        let query = &args[1];
-        let file_path = &args[2];
-
+impl Config {
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+        args.next();
+        let query_options = args.next();
+        let file_path_options = args.next();
         let ignore_case = env::var("IGNORE_CASE").is_ok();
+
+        Self::validate_args(&query_options, &file_path_options)?;
+        let query = query_options.unwrap();
+        let file_path = file_path_options.unwrap();
+        
 
         Ok(Config { query, file_path, ignore_case })
     }
 
-    fn validate_args(args: &[String]) -> Result<(), &str> {
-        if args.len() < 3 {
-            return Err("Wrong arguments length");
+    fn validate_args(query: &Option<String>, file_path: &Option<String>) -> Result<(), &'static str> {
+        if query.is_none() {
+            return Err("")
+        }
+
+        if file_path.is_none(){
+            return Err("")
         }
 
         Ok(())
@@ -31,9 +38,9 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.file_path)?;
 
     let results = if config.ignore_case {
-        search_case_insensitive(config.query, &contents)
+        search_case_insensitive(&config.query, &contents)
     }else{
-        search(config.query, &contents)
+        search(&config.query, &contents)
     };
 
     for line in results{
