@@ -23,11 +23,11 @@ impl Config {
 
     fn validate_args(query: &Option<String>, file_path: &Option<String>) -> Result<(), &'static str> {
         if query.is_none() {
-            return Err("")
+            return Err("Didn't get a query string")
         }
 
         if file_path.is_none(){
-            return Err("")
+            return Err("Didn't get a file path")
         }
 
         Ok(())
